@@ -4,12 +4,16 @@
 # convert file encoding to UTF-8
 #
 
-require 'fileutils'
 require 'digest'
+require 'fileutils'
 require 'open3'
+require 'rchardet19'
 
 # ----------------------------------------------------------------
 # initialize
+
+# ENCODINGS = ['UTF-8', 'GB2312', 'SHIFT_JIS', 'ISO-8859-1', 'ISO-8859-2', 'WINDOWS-1250', 'UTF-16LE', 'UTF-16BE']
+ENCODINGS = ['UTF-8', 'GB2312', 'ISO-8859-2', 'ISO-8859-1', 'SHIFT_JIS', 'WINDOWS-1250', 'UTF-16LE', 'UTF-16BE']
 
 # ----------------------------------------------------------------
 # utils
@@ -18,14 +22,18 @@ require 'open3'
 # methods
 
 def do_convert(files)
+    @statistic = {}
+
     i = 0
 
     IO.foreach(files, encode: 'UTF-8') do |file|
+        # break if i > 0
+
         file      = file.force_encoding('UTF-8').chomp
         file_orig = "#{file}.original~"
 
         # report file
-        puts "%04d -- [ %s ]" % [i += 1, file]
+        puts "★★★ %04d -- [ %s ]" % [i += 1, file]
 
         # backup to "xx.original~"
         if !File.exist?(file_orig)
@@ -40,12 +48,14 @@ def do_convert(files)
 
         # convert file encoding
         convert_encoding(file_orig, file)
+
+        puts
     end
+
+    puts Hash[@statistic.sort_by{|k, v| v}.reverse]
 end
 
 def convert_encoding(file_orig, file)
-    @statistic = {}
-
     dir       = File.dirname(file)
     name      = File.basename(file)
     name_orig = "#{name}.original~"
@@ -80,27 +90,46 @@ def convert_encoding(file_orig, file)
         FileUtils.mv dst, name
         FileUtils.rm src
     end
-
-    puts @statistic
 end
 
 def convert_encoding_of_file(src, dst)
-    ['UTF-8', 'GB2312', 'SJIS', 'WINDOWS-1250', 'UTF-16', 'ISO-8859-1'].each do |src_encoding|
-        cmd = "iconv -f #{src_encoding} -t UTF-8 \"#{src}\" > \"#{dst}\""
+    src_data = IO.binread(src)
+    cd       = CharDet.detect(src_data)
 
-        stdin, stdout, stderr = Open3.popen3(cmd)
-        err = stderr.readlines
+    puts cd
 
-        if err.size > 0
-            # puts cmd
-            err.each { |line| puts line.encode('UTF-8') }
-        else
-            @statistic[src_encoding] = @statistic[src_encoding].to_i + 1
-            return if check_convert_ok(src, dst, src_encoding)
-        end
+    src_encoding0 = CharDet.detect(src_data).encoding.upcase
+
+    if cd.confidence >= 0.6 && ENCODINGS.include?(src_encoding0)
+        return if convert_encoding_of_file_with_encoding(src, dst, src_encoding0)
+    end
+
+    ENCODINGS.each do |src_encoding|
+        next   if src_encoding == src_encoding0
+        return if convert_encoding_of_file_with_encoding(src, dst, src_encoding)
     end
 
     raise "can not convert from #{src} to #{dst}"
+end
+
+def convert_encoding_of_file_with_encoding(src, dst, src_encoding)
+    cmd = "iconv -f #{src_encoding} -t UTF-8 \"#{src}\" > \"#{dst}\""
+
+    stdin, stdout, stderr = Open3.popen3(cmd)
+    err = stderr.readlines
+
+    if err.size > 0
+        # puts cmd
+        err.each { |line| puts line.chomp.encode('UTF-8') + " with '#{src_encoding}'" }
+        return false
+    end
+
+    if !check_convert_ok(src, dst, src_encoding)
+        return false
+    end
+
+    @statistic[src_encoding] = @statistic[src_encoding].to_i + 1
+    return true
 end
 
 def check_convert_ok(src, dst, src_encoding)
@@ -115,8 +144,16 @@ def check_convert_ok(src, dst, src_encoding)
     src_data = []
     dst_data = []
 
-    IO.foreach(src, encode: src_encoding) do |line|
-        src_data << line.force_encoding(src_encoding).encode('UTF-8')
+    mode  = ['UTF-16LE', 'UTF-16BE'].include?(src_encoding) ? 'rb' : 'r'
+    mode += ":#{src_encoding}:UTF-8"
+
+    begin
+        IO.foreach(src, mode: mode) do |line|
+            src_data << line
+        end
+    rescue => e
+        puts e
+        return false
     end
 
     i = 0
@@ -125,27 +162,34 @@ def check_convert_ok(src, dst, src_encoding)
         i += 1
 
         line = line.force_encoding('UTF-8')
-        line.gsub!('¥', "\\") if src_encoding == 'SJIS'
+
+        if src_encoding == 'SHIFT_JIS'
+            line.gsub!('¥', "\\")
+            line.gsub!('‾', "~")
+        end
+
         dst_data << line
 
-        if line !~ %r[^[0-9a-z]*$]i
-            puts "%04d: %s" % [i, line]
+        if line !~ %r[^[0-9a-z \t\[\]\| /(){}<>;.,~!#&%'"=+-_*]*$]i && !line.start_with?("\xEF\xBB\xBF")
+            puts "    %04d: %s" % [i, line]
         end
     end
 
     if src_data.size != dst_data.size
-        puts "-1: src_data.size != dst_data.size"
+        puts "-1: src_data.size(%d) != dst_data.size(%d)" % [src_data.size, dst_data.size]
         return false
     end
 
     0.upto(src_data.size - 1) do |i|
-        if src_data[i] != dst_data[i]
+        if src_data[i].chomp != dst_data[i].chomp
             puts "-2: %d '%s' != '%s'" % [i + 1, src_data[i].chomp, dst_data[i].chomp]
+            p src_data[i].bytes.to_a
+            p dst_data[i].bytes.to_a
             return false
         end
     end
 
-    if src_encoding == 'SJIS'
+    if src_encoding == 'SHIFT_JIS'
         File.open(dst, "w+") do |f|
             f.puts(dst_data)
         end
