@@ -9,7 +9,7 @@ require 'awesome_print'
 
 ENCODING_CANDIDATES = ['UTF-8', 'GB2312', 'ISO-8859-2', 'ISO-8859-1', 'SHIFT_JIS', 'WINDOWS-1250', 'UTF-16LE', 'UTF-16BE']
 TO_ENCODING         = 'UTF-8'
-MAX_SAMPLES         = 5
+MAX_SAMPLES         = 2
 DEBUG               = false
 
 module EncTest
@@ -63,7 +63,7 @@ module EncTest
                 return res
             end
 
-            if dst_samples.count < MAX_SAMPLES && (i < 2 || dst_line =~ /[^[:ascii:]]/i)
+            if dst_samples.count < MAX_SAMPLES && (i < 1 || dst_line =~ /[^[:ascii:]]/i)
                 dst_samples << "%04d: %s" % [i + 1, dst_line]
             end
         end
