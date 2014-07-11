@@ -4,20 +4,16 @@
 # test encoding of source data
 #
 
-require 'rchardet19'
 require 'awesome_print'
+require 'rchardet19'
+require './utils'
 
 ENCODING_CANDIDATES = ['UTF-8', 'GB2312', 'ISO-8859-2', 'ISO-8859-1', 'SHIFT_JIS', 'WINDOWS-1250', 'UTF-16LE', 'UTF-16BE']
 TO_ENCODING         = 'UTF-8'
-MAX_SAMPLES         = 2
+MAX_SAMPLES         = 5
 DEBUG               = false
 
 module EncTest
-    def self.report_error(e)
-        $stderr.puts "Error during processing: #{$!}"
-        $stderr.puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
-    end
-
     def self.encode(src, encoding)
         return src.encode(TO_ENCODING, encoding)
     rescue => e
@@ -72,7 +68,7 @@ module EncTest
         res << dst_samples
         return res
     rescue => e
-        report_error e if DEBUG
+        Utils.report_error e if DEBUG
 
         res << false
         res << e
