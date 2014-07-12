@@ -39,11 +39,8 @@ class EncApp < Qt::MainWindow
     end
 
     def init_ui
-        # toolbar
-        toolbar = addToolBar 'main toolbar'
-
-        select_folder = toolbar.addAction @icon, SELECT_FOLDER
-        connect select_folder, SIGNAL('triggered()'), SLOT('on_triggered()')
+        init_toolbar
+        init_statusbar
 
         # @widget1 & @grid1
         @widget1.close if @widget1
@@ -61,6 +58,32 @@ class EncApp < Qt::MainWindow
         @grid1.addWidget @extensions_label, 1, 0
 
         @grid1.setRowStretch 2, 1
+    end
+
+    def init_toolbar
+        toolbar = addToolBar 'main toolbar'
+
+        select_folder = toolbar.addAction @icon, SELECT_FOLDER
+        connect select_folder, SIGNAL('triggered()'), SLOT('on_triggered()')
+    end
+
+    def init_statusbar
+        statusBar.styleSheet = 'background-color:#f9e7ef;'
+
+        @progress_encode = Qt::ProgressBar.new
+        @progress_select = Qt::ProgressBar.new
+        @label_skipped   = Qt::Label.new "Skipped: 0"
+        @label_selected  = Qt::Label.new "Selected: 0"
+        @label_total     = Qt::Label.new "Total: 0"
+
+        @progress_encode.hide
+        @progress_select.hide
+
+        statusBar.addPermanentWidget @progress_encode, 1
+        statusBar.addPermanentWidget @progress_select, 1
+        statusBar.addPermanentWidget @label_skipped
+        statusBar.addPermanentWidget @label_selected
+        statusBar.addPermanentWidget @label_total
     end
 
     def on_triggered()
