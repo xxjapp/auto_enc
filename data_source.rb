@@ -23,15 +23,12 @@ class DataSource
     end
 
     def collect_paths()
-        @paths = []
+        pattern = "#{File.expand_path(@path)}/**/*.{#{@extensions.join(',')}}"
+        flag    = File::FNM_DOTMATCH
+        @paths  = []
 
-        Find.find(@path) do |path|
+        Dir.glob(pattern, flag) do |path|
             return if @canceled
-
-            Find.prune if File.basename(path) == '.svn'
-
-            next if File.directory? path
-            next if !@extensions.include?(File.extname(path)[1..-1].to_s.downcase)
 
             @paths << path
             push [@paths.size, path]

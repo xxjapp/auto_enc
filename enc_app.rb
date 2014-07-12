@@ -5,7 +5,6 @@
 #
 
 require 'Qt'
-require 'find'
 
 require './check_button'
 require './data_source'
