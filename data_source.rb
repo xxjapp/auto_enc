@@ -8,19 +8,28 @@ require 'awesome_print'
 require './enc_test'
 require './simple_log'
 
-class DataSource
+class DataSource < Qt::Object
     LOG   = SimpleLog.new $stdout
     DEBUG = true
 
+    signals 'collect_paths_finished()'
+    signals 'test_one_finished()'
+    signals 'pick_one_skipped()'
+
     def initialize(path, extensions)
+        super(nil)
+
         @path       = path
         @extensions = extensions
         @queue      = Queue.new
+        @skipped    = 0
+        @selected   = 0
     end
 
     def start_test_encode()
         Thread.new do
             collect_paths()
+            emit collect_paths_finished()
             test_encode()
         end
     end
@@ -42,6 +51,7 @@ class DataSource
             result[:path] = path
 
             push result
+            emit test_one_finished()
         end
 
         push :end
@@ -59,7 +69,27 @@ class DataSource
         return data if data.is_a? Symbol
 
         cd = data[:cd]
-        is_ascii?(cd) ? pick_enc_data() : data
+
+        if is_ascii?(cd)
+            @skipped += 1
+            emit pick_one_skipped()
+            return pick_enc_data()
+        else
+            @selected += 1
+            return data
+        end
+    end
+
+    def total
+        @paths.size
+    end
+
+    def skipped
+        @skipped
+    end
+
+    def selected
+        @selected
     end
 
     def is_ascii?(cd)

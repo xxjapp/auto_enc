@@ -22,11 +22,17 @@ class EncApp < Qt::MainWindow
     slots 'on_triggered()'
     slots 'on_clicked()'
 
+    slots 'on_collect_paths_finished()'
+    slots 'on_test_one_finished()'
+    slots 'on_pick_one_skipped()'
+
     def initialize
         super
 
         @icon       = Qt::Icon.new('red_24.png')
-        @path       = "C:/Users/XX9150/Desktop/old2" # use File.dirname(File.expand_path(__FILE__))
+        # use File.dirname(File.expand_path(__FILE__))
+        # "C:/"
+        @path       = "C:/Users/XX9150/Desktop/old2"
         @extensions = %w[txt]
 
         self.windowTitle = TITLE
@@ -72,18 +78,18 @@ class EncApp < Qt::MainWindow
 
         @progress_encode = Qt::ProgressBar.new
         @progress_select = Qt::ProgressBar.new
-        @label_skipped   = Qt::Label.new "Skipped: 0"
-        @label_selected  = Qt::Label.new "Selected: 0"
-        @label_total     = Qt::Label.new "Total: 0"
+        @label_total     = Qt::Label.new
+        @label_skipped   = Qt::Label.new
+        @label_selected  = Qt::Label.new
 
         @progress_encode.hide
         @progress_select.hide
 
         statusBar.addPermanentWidget @progress_encode, 1
         statusBar.addPermanentWidget @progress_select, 1
+        statusBar.addPermanentWidget @label_total
         statusBar.addPermanentWidget @label_skipped
         statusBar.addPermanentWidget @label_selected
-        statusBar.addPermanentWidget @label_total
     end
 
     def on_triggered()
@@ -111,12 +117,56 @@ class EncApp < Qt::MainWindow
 
     def collect_paths
         @data_source = DataSource.new(@path, @extensions)
+
+        connect @data_source, SIGNAL('collect_paths_finished()'),   SLOT('on_collect_paths_finished()')
+        connect @data_source, SIGNAL('test_one_finished()'),        SLOT('on_test_one_finished()')
+        connect @data_source, SIGNAL('pick_one_skipped()'),         SLOT('on_pick_one_skipped()')
+
         @data_source.start_test_encode
 
         show_selection
     end
 
+    def on_collect_paths_finished()
+        total = @data_source.total
+
+        @label_total.text    = " Total: #{total} "
+        @label_skipped.text  = " Skipped: 0 "
+        @label_selected.text = " Selected: 0 "
+
+        @progress_encode.show
+        @progress_select.show
+
+        @progress_encode.range = 0..total
+        @progress_select.range = 0..total
+
+        @progress_encode.value = 0
+        @progress_select.value = 0
+    end
+
+    def on_test_one_finished()
+        LOG.info __method__
+
+        @progress_encode.value += 1
+    end
+
+    def on_pick_one_skipped()
+        LOG.info __method__
+
+        skipped = @data_source.skipped
+        @label_skipped.text = " Skipped: #{skipped} "
+
+        @progress_select.value += 1
+    end
+
     def on_clicked()
+        LOG.info __method__
+
+        selected = @data_source.selected
+        @label_selected.text = " Selected: #{selected} "
+
+        @progress_select.value += 1
+
         show_selection
     end
 
