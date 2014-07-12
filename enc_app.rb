@@ -116,6 +116,7 @@ class EncApp < Qt::MainWindow
     end
 
     def collect_paths
+        @data_source.cancel if @data_source
         @data_source = DataSource.new(@path, @extensions)
 
         connect @data_source, SIGNAL('collect_paths_finished()'),   SLOT('on_collect_paths_finished()')
