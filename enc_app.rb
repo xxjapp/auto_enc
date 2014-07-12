@@ -9,7 +9,6 @@ require 'Qt'
 require './check_button'
 require './data_source'
 require './enc_folder_dlg'
-require './enc_progress_dlg'
 require './simple_log'
 require './utils'
 
@@ -27,7 +26,7 @@ class EncApp < Qt::MainWindow
         super
 
         @icon       = Qt::Icon.new('red_24.png')
-        @path       = File.dirname(File.expand_path(__FILE__))
+        @path       = "C:/Users/XX9150/Desktop/old2" # use File.dirname(File.expand_path(__FILE__))
         @extensions = %w[txt]
 
         self.windowTitle = TITLE
@@ -89,14 +88,9 @@ class EncApp < Qt::MainWindow
 
     def collect_paths
         @data_source = DataSource.new(@path, @extensions)
-        @data_source.start_collect_paths
+        @data_source.start_test_encode
 
-        progress_dlg = EncProgressDlg.new(@data_source, "Cancel", self)
-
-        if progress_dlg.show
-            @data_source.start_test_encode
-            show_selection
-        end
+        show_selection
     end
 
     def on_clicked()

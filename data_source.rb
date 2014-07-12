@@ -4,11 +4,13 @@
 # - class DataSource
 #
 
+require 'awesome_print'
 require './enc_test'
 require './simple_log'
 
 class DataSource
-    LOG = SimpleLog.new $stdout
+    LOG   = SimpleLog.new $stdout
+    DEBUG = true
 
     def initialize(path, extensions)
         @path       = path
@@ -16,47 +18,19 @@ class DataSource
         @queue      = Queue.new
     end
 
-    def start_collect_paths()
+    def start_test_encode()
         Thread.new do
             collect_paths()
+            test_encode()
         end
     end
 
     def collect_paths()
         pattern = "#{File.expand_path(@path)}/**/*.{#{@extensions.join(',')}}"
         flag    = File::FNM_DOTMATCH
-        @paths  = []
 
-        Dir.glob(pattern, flag) do |path|
-            return if @canceled
-
-            @paths << path
-            push [@paths.size, path]
-        end
-
-        push :end
-    end
-
-    def push(data)
-        LOG.info data if data.is_a? Symbol
-        @queue.push data
-    end
-
-    def pick()
-        return :no_data if @queue.empty?
-
-        # skip all except last 2 items
-        1.upto(@queue.size - 2) {
-            @queue.pop
-        }
-
-        @queue.pop
-    end
-
-    def start_test_encode()
-        Thread.new do
-            test_encode()
-        end
+        @paths = Dir.glob(pattern, flag)
+        ap @paths if DEBUG
     end
 
     def test_encode()
@@ -73,6 +47,11 @@ class DataSource
         push :end
     end
 
+    def push(data)
+        LOG.info data if data.is_a? Symbol
+        @queue.push data
+    end
+
     def pick_enc_data()
         return :no_data if @queue.empty?
 
@@ -85,10 +64,5 @@ class DataSource
 
     def is_ascii?(cd)
         cd.encoding == 'ascii' && cd.confidence = 1.0
-    end
-
-    def cancel
-        @canceled = true
-        LOG.info 'canceled'
     end
 end
