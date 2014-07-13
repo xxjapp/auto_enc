@@ -75,9 +75,10 @@ class DataSource < Qt::Object
         data = @queue.pop
         return data if data.is_a? Symbol
 
-        cd = data[:cd]
+        bom = data[:bom]
+        cd  = data[:cd]
 
-        if is_ascii?(cd)
+        if bom || is_ascii?(cd)
             @skipped += 1
             emit pick_one_skipped()
             return pick_enc_data()

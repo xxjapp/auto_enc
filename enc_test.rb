@@ -6,6 +6,7 @@
 
 require 'awesome_print'
 require 'rchardet19'
+require './bom_utils'
 require './utils'
 
 ENCODING_CANDIDATES = ['UTF-8', 'GB2312', 'ISO-8859-2', 'ISO-8859-1', 'SHIFT_JIS', 'WINDOWS-1250', 'UTF-16LE', 'UTF-16BE']
@@ -21,11 +22,22 @@ module EncTest
     end
 
     def self.encode_all(src, result)
-        cd        = CharDet.detect(src)
-        encoding0 = cd.encoding.upcase
-        result[:cd] = cd
+        bom = BomUtils.detect(src)
 
-        yield encoding0, encode(src, encoding0)
+        if bom
+            result[:bom] = bom
+            return
+        end
+
+        begin
+            cd = CharDet.detect(src)
+            result[:cd] = cd
+
+            encoding0 = cd.encoding.upcase
+            yield encoding0, encode(src, encoding0)
+        rescue => e
+            Utils.report_error e if DEBUG
+        end
 
         ENCODING_CANDIDATES.each do |encoding|
             next if encoding == encoding0
@@ -95,10 +107,17 @@ end
 # test
 
 if __FILE__ == $0
-    src = IO.binread 'C:\Users\XX9150\Desktop\downloads.txt'
+    src = IO.binread 'C:\Users\XX9150\AppData\Local\GitHub\PortableGit_054f2e797ebafd44a30203088cd3d58663c627ef\doc\git\html\urls.txt'
 
     result = EncTest.test(src)
     ap result if DEBUG
+
+    bom = result[:bom]
+
+    if bom
+        puts bom
+        exit
+    end
 
     puts result[:cd]
 
