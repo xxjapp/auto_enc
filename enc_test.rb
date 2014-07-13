@@ -74,10 +74,6 @@ module EncTest
         result = {}
 
         encode_all(src, result) do |encoding, dst|
-            if dst.is_a? Exception
-                next
-            end
-
             src.force_encoding(encoding)
             result[encoding] = check_encode(encoding, src, dst)
         end
