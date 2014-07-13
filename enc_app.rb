@@ -32,7 +32,7 @@ class EncApp < Qt::MainWindow
         @icon       = Qt::Icon.new('red_24.png')
         # use File.dirname(File.expand_path(__FILE__))
         # "C:/"
-        @path       = "C:/Users/XX9150"
+        @path       = "C:/Users"
         @extensions = %w[txt]
 
         self.windowTitle = TITLE

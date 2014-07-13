@@ -7,17 +7,21 @@
 require 'awesome_print'
 require 'rchardet19'
 require './bom_utils'
+require './simple_log'
 require './utils'
 
-ENCODING_CANDIDATES = ['UTF-8', 'GB2312', 'ISO-8859-2', 'ISO-8859-1', 'SHIFT_JIS', 'WINDOWS-1250', 'UTF-16LE', 'UTF-16BE']
-TO_ENCODING         = 'UTF-8'
-MAX_SAMPLES         = 5
-DEBUG               = false
-
 module EncTest
+    LOG = SimpleLog.new $stdout
+
+    ENCODING_CANDIDATES = ['UTF-8', 'GB2312', 'ISO-8859-2', 'ISO-8859-1', 'SHIFT_JIS', 'WINDOWS-1250', 'UTF-16LE', 'UTF-16BE']
+    TO_ENCODING         = 'UTF-8'
+    MAX_SAMPLES         = 5
+    DEBUG               = false
+
     def self.encode(src, encoding)
         return src.encode(TO_ENCODING, encoding)
     rescue => e
+        Utils.report_error e if DEBUG
         return e
     end
 
@@ -107,10 +111,10 @@ end
 # test
 
 if __FILE__ == $0
-    src = IO.binread 'C:\Users\XX9150\AppData\Local\GitHub\PortableGit_054f2e797ebafd44a30203088cd3d58663c627ef\doc\git\html\urls.txt'
+    src = IO.binread 'C:\Users\Default\AppData\Local\Microsoft\Internet Explorer\brndlog.txt'
 
     result = EncTest.test(src)
-    ap result if DEBUG
+    ap result
 
     bom = result[:bom]
 
