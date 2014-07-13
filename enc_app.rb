@@ -15,9 +15,11 @@ require './utils'
 class EncApp < Qt::MainWindow
     LOG = SimpleLog.new $stdout
 
-    TITLE         = 'Enc App'
-    SELECT_FOLDER = 'Select folder'
-    FONT          = Qt::Font.new "Microsoft YaHei-X", 12
+    TITLE            = 'Enc App'
+    SELECT_FOLDER    = 'Select folder'
+    SPECIFY_KEYWORDS = 'Specify keywords'
+
+    FONT = Qt::Font.new "Microsoft YaHei-X", 12
 
     slots 'on_triggered()'
     slots 'on_clicked()'
@@ -29,14 +31,15 @@ class EncApp < Qt::MainWindow
     def initialize
         super
 
-        @icon = Qt::Icon.new('red_24.png')
+        @icon0 = Qt::Icon.new('red_24.png')
+        @icon1 = Qt::Icon.new('green_24.png')
 
         # use File.dirname(File.expand_path(__FILE__))
         @path       = "D:/xxj_backup_20130519"
         @extensions = %w[original original~]
 
         self.windowTitle = TITLE
-        self.windowIcon  = @icon
+        self.windowIcon  = @icon0
 
         init_ui
 
@@ -59,18 +62,23 @@ class EncApp < Qt::MainWindow
 
         @path_label       = Qt::Label.new
         @extensions_label = Qt::Label.new
+        @keywords_label   = Qt::Label.new
 
         @grid1.addWidget @path_label, 0, 0
         @grid1.addWidget @extensions_label, 1, 0
+        @grid1.addWidget @keywords_label, 2, 0
 
-        @grid1.setRowStretch 2, 1
+        @grid1.setRowStretch 4, 1
     end
 
     def init_toolbar
         toolbar = addToolBar 'main toolbar'
 
-        select_folder = toolbar.addAction @icon, SELECT_FOLDER
+        select_folder = toolbar.addAction @icon0, SELECT_FOLDER
         connect select_folder, SIGNAL('triggered()'), SLOT('on_triggered()')
+
+        specify_keywords = toolbar.addAction @icon1, SPECIFY_KEYWORDS
+        connect specify_keywords, SIGNAL('triggered()'), SLOT('on_triggered()')
     end
 
     def init_statusbar
@@ -101,6 +109,8 @@ class EncApp < Qt::MainWindow
     def on_triggered()
         if sender.text == SELECT_FOLDER
             select_folder
+        elsif sender.text == SPECIFY_KEYWORDS
+            specify_keywords
         end
     end
 
@@ -121,9 +131,26 @@ class EncApp < Qt::MainWindow
         end
     end
 
+    def specify_keywords
+        input_dlg = Qt::InputDialog.new(self)
+
+        input_dlg.windowTitle = "Keywords"
+        input_dlg.labelText   = "Specify keywords"
+        input_dlg.textValue   = @keywords.join(' ') if @keywords
+
+        if input_dlg.exec == 1
+            keywords = input_dlg.textValue
+
+            if keywords
+                @keywords = keywords.force_encoding('UTF-8').split(/\s+/)
+                @data_source.keywords = @keywords if @data_source
+            end
+        end
+    end
+
     def start_process
         @data_source.cancel if @data_source
-        @data_source = DataSource.new(@path, @extensions)
+        @data_source = DataSource.new(@path, @extensions, @keywords)
 
         connect @data_source, SIGNAL('collect_paths_finished()'),   SLOT('on_collect_paths_finished()')
         connect @data_source, SIGNAL('test_one_finished()'),        SLOT('on_test_one_finished()')
@@ -201,7 +228,7 @@ class EncApp < Qt::MainWindow
         end
 
         @widget2 = Qt::Widget.new
-        @grid1.addWidget @widget2, 2, 0
+        @grid1.addWidget @widget2, 4, 0
 
         @grid2 = Qt::GridLayout.new @widget2
 

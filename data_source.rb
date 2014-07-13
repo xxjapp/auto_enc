@@ -13,15 +13,18 @@ class DataSource < Qt::Object
     LOG   = SimpleLog.new $stdout
     DEBUG = true
 
+    attr_accessor :keywords
+
     signals 'collect_paths_finished()'
     signals 'test_one_finished()'
     signals 'pick_one_skipped()'
 
-    def initialize(path, extensions)
+    def initialize(path, extensions, keywords)
         super(nil)
 
         @path       = path
         @extensions = extensions
+        @keywords   = keywords
         @queue      = Queue.new
         @skipped    = 0
         @selected   = 0
@@ -86,7 +89,7 @@ class DataSource < Qt::Object
         cd    = data[:cd]
         error = data[:error]
 
-        if bom || error || cd && is_ascii?(cd)
+        if bom || error || is_ascii?(cd) || include_user_keywords(data)
             @skipped += 1
             emit pick_one_skipped()
             return pick_enc_data()
@@ -94,6 +97,30 @@ class DataSource < Qt::Object
             @selected += 1
             return data
         end
+    end
+
+    def is_ascii?(cd)
+        cd && cd.encoding == 'ascii' && cd.confidence = 1.0
+    end
+
+    def include_user_keywords(result)
+        return false if !@keywords
+
+        result.each do |k, v|
+            next if !v.is_a? Array
+
+            # TODO: save encoding
+            encoding    = k
+            dst_samples = v
+
+            dst_samples.each { |sample|
+                @keywords.each { |keyword|
+                    return true if sample.include? keyword
+                }
+            }
+        end
+
+        return false
     end
 
     def total
@@ -106,9 +133,5 @@ class DataSource < Qt::Object
 
     def selected
         @selected
-    end
-
-    def is_ascii?(cd)
-        cd.encoding == 'ascii' && cd.confidence = 1.0
     end
 end
