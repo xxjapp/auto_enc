@@ -85,6 +85,12 @@ class EncApp < Qt::MainWindow
         @progress_encode.hide
         @progress_select.hide
 
+        @progress_encode.toolTip = "background encoding progress"
+        @progress_select.toolTip = "user selection plus auto-skipped progress"
+        @label_total.toolTip     = "total file count"
+        @label_skipped.toolTip   = "auto-skipped file count including files with bom or file reading error or pure ascii file"
+        @label_selected.toolTip  = "user selected file count"
+
         statusBar.addPermanentWidget @progress_encode, 1
         statusBar.addPermanentWidget @progress_select, 1
         statusBar.addPermanentWidget @label_total
