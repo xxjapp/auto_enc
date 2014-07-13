@@ -75,7 +75,7 @@ class EncFolderDlg < Qt::Dialog
     end
 
     def select_folder
-        dlg = Qt::FileDialog.new
+        dlg = Qt::FileDialog.new(self, "Select folder", @path)
 
         dlg.fileMode = Qt::FileDialog::Directory
         dlg.options  = Qt::FileDialog::ShowDirsOnly
