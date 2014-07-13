@@ -51,7 +51,7 @@ class DataSource < Qt::Object
 
             begin
                 src    = IO.binread path
-                result = EncTest.test(src)
+                result = EncTest.encode_all(src)
             rescue => e
                 result = {error: e}
                 Utils.report_error e

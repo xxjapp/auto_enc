@@ -18,28 +18,34 @@ module EncTest
     MAX_SAMPLES         = 5
     DEBUG               = false
 
-    def self.encode(src, encoding)
-        src.encode(TO_ENCODING, encoding)
-    end
+    def self.encode_all(src)
+        result = {}
 
-    def self.encode_all(src, result)
         bom = BomUtils.detect(src)
 
         if bom
             result[:bom] = bom
-            return
+            return result
         end
 
         cd = CharDet.detect(src)
         result[:cd] = cd
 
         encoding0 = cd.encoding.upcase
-        yield encoding0, encode(src, encoding0)
+        result[encoding] = encode_and_check(src, encoding0)
 
         ENCODING_CANDIDATES.each do |encoding|
             next if encoding == encoding0
-            yield encoding, encode(src, encoding)
+            result[encoding] = encode_and_check(src, encoding)
         end
+
+        return result
+    end
+
+    def self.encode_and_check(src, encoding)
+        src.force_encoding(encoding)
+        dst = src.encode(TO_ENCODING)
+        check_encode(encoding, src, dst)
     end
 
     def self.check_encode(encoding, src, dst)
@@ -69,17 +75,6 @@ module EncTest
 
         dst_samples
     end
-
-    def self.test(src)
-        result = {}
-
-        encode_all(src, result) do |encoding, dst|
-            src.force_encoding(encoding)
-            result[encoding] = check_encode(encoding, src, dst)
-        end
-
-        return result
-    end
 end
 
 # ----------------------------------------------------------------
@@ -88,7 +83,7 @@ end
 if __FILE__ == $0
     begin
         src    = IO.binread 'C:\RailsInstaller\DevKit\lib\perl5\5.8\unicore\NamesList.txt'
-        result = EncTest.test(src)
+        result = EncTest.encode_all(src)
     rescue => e
         Utils.report_error e
         exit
