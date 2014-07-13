@@ -78,7 +78,7 @@ class DataSource < Qt::Object
         bom = data[:bom]
         cd  = data[:cd]
 
-        if bom || is_ascii?(cd)
+        if bom || cd && is_ascii?(cd)
             @skipped += 1
             emit pick_one_skipped()
             return pick_enc_data()
