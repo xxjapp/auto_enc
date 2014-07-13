@@ -7,6 +7,7 @@
 require 'awesome_print'
 require './enc_test'
 require './simple_log'
+require './utils'
 
 class DataSource < Qt::Object
     LOG   = SimpleLog.new $stdout
@@ -48,8 +49,15 @@ class DataSource < Qt::Object
 
             LOG.info path
 
-            src    = IO.binread path
-            result = EncTest.test(src)
+            begin
+                src    = IO.binread path
+                result = EncTest.test(src)
+            rescue => e
+                result = {}
+                result[:error] = e
+                Utils.report_error e
+            end
+
             result[:path] = path
 
             push result
@@ -75,10 +83,11 @@ class DataSource < Qt::Object
         data = @queue.pop
         return data if data.is_a? Symbol
 
-        bom = data[:bom]
-        cd  = data[:cd]
+        bom   = data[:bom]
+        cd    = data[:cd]
+        error = data[:error]
 
-        if bom || cd && is_ascii?(cd)
+        if bom || error || cd && is_ascii?(cd)
             @skipped += 1
             emit pick_one_skipped()
             return pick_enc_data()

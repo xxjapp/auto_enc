@@ -111,7 +111,12 @@ end
 # test
 
 if __FILE__ == $0
-    src = IO.binread 'C:\Users\Default\AppData\Local\Microsoft\Internet Explorer\brndlog.txt'
+    begin
+        src = IO.binread 'C:/Windows/System32/log.txt'
+    rescue => e
+        Utils.report_error e
+        exit
+    end
 
     result = EncTest.test(src)
     ap result
