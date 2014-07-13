@@ -44,7 +44,7 @@ class DataSource < Qt::Object
 
     def test_encode()
         @paths.each do |path|
-            return if @wasCancelled
+            return if @wasCanceled
 
             LOG.info path
 
@@ -60,8 +60,8 @@ class DataSource < Qt::Object
     end
 
     def cancel
-        @wasCancelled = true
-        LOG.info 'wasCancelled'
+        @wasCanceled = true
+        LOG.info 'wasCanceled'
     end
 
     def push(data)
