@@ -19,10 +19,7 @@ module EncTest
     DEBUG               = false
 
     def self.encode(src, encoding)
-        return src.encode(TO_ENCODING, encoding)
-    rescue => e
-        Utils.report_error e if DEBUG
-        return e
+        src.encode(TO_ENCODING, encoding)
     end
 
     def self.encode_all(src, result)
@@ -33,15 +30,11 @@ module EncTest
             return
         end
 
-        begin
-            cd = CharDet.detect(src)
-            result[:cd] = cd
+        cd = CharDet.detect(src)
+        result[:cd] = cd
 
-            encoding0 = cd.encoding.upcase
-            yield encoding0, encode(src, encoding0)
-        rescue => e
-            Utils.report_error e if DEBUG
-        end
+        encoding0 = cd.encoding.upcase
+        yield encoding0, encode(src, encoding0)
 
         ENCODING_CANDIDATES.each do |encoding|
             next if encoding == encoding0
@@ -50,15 +43,11 @@ module EncTest
     end
 
     def self.check_encode(encoding, src, dst)
-        res = []
-
         src_lines = src.lines.to_a
         dst_lines = dst.lines.to_a
 
         if src_lines.size != dst_lines.size
-            res << false
-            res << "-1: src_lines.size(%d) != dst_lines.size(%d)" % [src_lines.size, dst_lines.size]
-            return res
+            LOG.error "-1: src_lines.size(%d) != dst_lines.size(%d)" % [src_lines.size, dst_lines.size]
         end
 
         dst_samples = []
@@ -68,11 +57,9 @@ module EncTest
             dst_line = dst_lines[i].chomp
 
             if src_line != dst_line
-                res << false
-                res <<  "-2: %d '%s' != '%s'" % [i + 1, src_line, dst_line]
-                res <<  src_lines[i].bytes.to_a
-                res <<  dst_lines[i].bytes.to_a
-                return res
+                LOG.error "-2: %d '%s' != '%s'" % [i + 1, src_line, dst_line]
+                LOG.error src_lines[i].bytes.to_a
+                LOG.error dst_lines[i].bytes.to_a
             end
 
             if dst_samples.count < MAX_SAMPLES && (i < 1 || dst_line =~ /[^[:ascii:]]/i)
@@ -80,15 +67,7 @@ module EncTest
             end
         end
 
-        res << true
-        res << dst_samples
-        return res
-    rescue => e
-        Utils.report_error e if DEBUG
-
-        res << false
-        res << e
-        return res
+        dst_samples
     end
 
     def self.test(src)
@@ -112,13 +91,13 @@ end
 
 if __FILE__ == $0
     begin
-        src = IO.binread 'C:\RailsInstaller\DevKit\lib\perl5\5.8\unicore\NamesList.txt'
+        src    = IO.binread 'C:\RailsInstaller\DevKit\lib\perl5\5.8\unicore\NamesList.txt'
+        result = EncTest.test(src)
     rescue => e
         Utils.report_error e
         exit
     end
 
-    result = EncTest.test(src)
     ap result
 
     bom = result[:bom]
@@ -134,13 +113,10 @@ if __FILE__ == $0
         next if k == :cd
 
         encoding    = k
-        ok          = v[0]
-        dst_samples = v[1]
+        dst_samples = v
 
-        if ok
-            puts "X================ %s" % encoding
-            puts dst_samples
-            puts
-        end
+        puts "X================ %s" % encoding
+        puts dst_samples
+        puts
     end
 end

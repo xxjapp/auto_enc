@@ -53,8 +53,7 @@ class DataSource < Qt::Object
                 src    = IO.binread path
                 result = EncTest.test(src)
             rescue => e
-                result = {}
-                result[:error] = e
+                result = {error: e}
                 Utils.report_error e
             end
 

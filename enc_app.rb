@@ -220,17 +220,14 @@ class EncApp < Qt::MainWindow
             next if [:cd, :path].include? k
 
             encoding    = k
-            ok          = v[0]
-            dst_samples = v[1]
+            dst_samples = v
 
-            if ok
-                button = CheckButton.new(encoding, dst_samples)
-                button.adjustSize
-                max_width = [max_width, button.width].max
-                buttons << button
+            button = CheckButton.new(encoding, dst_samples)
+            button.adjustSize
+            max_width = [max_width, button.width].max
+            buttons << button
 
-                connect button, SIGNAL('clicked()'), SLOT('on_clicked()')
-            end
+            connect button, SIGNAL('clicked()'), SLOT('on_clicked()')
         end
 
         total_width  = self.width
