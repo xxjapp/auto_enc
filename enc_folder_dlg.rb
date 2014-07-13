@@ -36,6 +36,8 @@ class EncFolderDlg < Qt::Dialog
         ok_button     = Qt::PushButton.new TEXT_OK
         cancel_button = Qt::PushButton.new TEXT_CANCEL
 
+        ok_button.default = true
+
         grid = Qt::GridLayout.new self
 
         grid.addWidget path_label, 0, 0
