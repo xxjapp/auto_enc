@@ -29,11 +29,11 @@ class EncApp < Qt::MainWindow
     def initialize
         super
 
-        @icon       = Qt::Icon.new('red_24.png')
+        @icon = Qt::Icon.new('red_24.png')
+
         # use File.dirname(File.expand_path(__FILE__))
-        # "C:/"
-        @path       = "C:/"
-        @extensions = %w[txt]
+        @path       = "D:/xxj_backup_20130519"
+        @extensions = %w[original, original~]
 
         self.windowTitle = TITLE
         self.windowIcon  = @icon

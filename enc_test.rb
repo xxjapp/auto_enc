@@ -93,7 +93,7 @@ end
 
 if __FILE__ == $0
     begin
-        src    = IO.binread 'C:\RailsInstaller\DevKit\lib\perl5\5.8\unicore\NamesList.txt'
+        src    = IO.binread 'D:\Python33\Lib\test\cjkencodings\big5-utf8.txt'
         result = EncTest.encode_all(src)
     rescue => e
         Utils.report_error e
