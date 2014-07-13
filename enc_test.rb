@@ -32,7 +32,7 @@ module EncTest
         result[:cd] = cd
 
         encoding0 = cd.encoding.upcase
-        result[encoding] = encode_and_check(src, encoding0)
+        result[encoding0] = encode_and_check(src, encoding0)
 
         ENCODING_CANDIDATES.each do |encoding|
             next if encoding == encoding0
