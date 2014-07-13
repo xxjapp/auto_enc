@@ -33,7 +33,7 @@ class EncApp < Qt::MainWindow
 
         # use File.dirname(File.expand_path(__FILE__))
         @path       = "D:/xxj_backup_20130519"
-        @extensions = %w[original, original~]
+        @extensions = %w[original original~]
 
         self.windowTitle = TITLE
         self.windowIcon  = @icon

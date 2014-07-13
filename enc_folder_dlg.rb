@@ -53,7 +53,7 @@ class EncFolderDlg < Qt::Dialog
         @path_edit.text = @path
         @path_edit.placeholderText = 'Select a folder'
 
-        @extensions_edit.text = @extensions
+        @extensions_edit.text = @extensions.join(', ')
         @extensions_edit.placeholderText= "Specify extensions seperated with ','"
 
         connect path_button,   SIGNAL('clicked()'), SLOT('on_clicked()')
