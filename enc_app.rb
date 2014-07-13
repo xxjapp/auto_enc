@@ -22,6 +22,7 @@ class EncApp < Qt::MainWindow
     slots 'on_triggered()'
     slots 'on_clicked()'
 
+    slots 'on_collect_paths_start()'
     slots 'on_collect_paths_finished()'
     slots 'on_test_one_finished()'
     slots 'on_pick_one_skipped()'
@@ -119,6 +120,7 @@ class EncApp < Qt::MainWindow
         @data_source.cancel if @data_source
         @data_source = DataSource.new(@path, @extensions)
 
+        connect @data_source, SIGNAL('collect_paths_start()'),      SLOT('on_collect_paths_start()')
         connect @data_source, SIGNAL('collect_paths_finished()'),   SLOT('on_collect_paths_finished()')
         connect @data_source, SIGNAL('test_one_finished()'),        SLOT('on_test_one_finished()')
         connect @data_source, SIGNAL('pick_one_skipped()'),         SLOT('on_pick_one_skipped()')
@@ -128,15 +130,24 @@ class EncApp < Qt::MainWindow
         show_selection
     end
 
-    def on_collect_paths_finished()
-        total = @data_source.total
-
-        @label_total.text    = " Total: #{total} "
+    def on_collect_paths_start()
+LOG.info 1
+        @label_total.text    = " Total: 0 "
         @label_skipped.text  = " Skipped: 0 "
         @label_selected.text = " Selected: 0 "
 
         @progress_encode.show
         @progress_select.show
+
+        @progress_encode.range = 0..0
+        @progress_select.range = 0..0
+LOG.info 2
+    end
+
+    def on_collect_paths_finished()
+        total = @data_source.total
+
+        @label_total.text    = " Total: #{total} "
 
         @progress_encode.range = 0..total
         @progress_select.range = 0..total

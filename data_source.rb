@@ -12,6 +12,7 @@ class DataSource < Qt::Object
     LOG   = SimpleLog.new $stdout
     DEBUG = true
 
+    signals 'collect_paths_start()'
     signals 'collect_paths_finished()'
     signals 'test_one_finished()'
     signals 'pick_one_skipped()'
@@ -28,8 +29,11 @@ class DataSource < Qt::Object
 
     def start_test_encode()
         Thread.new do
+            emit collect_paths_start()
+            sleep 0
             collect_paths()
             emit collect_paths_finished()
+
             test_encode()
         end
     end
@@ -39,7 +43,7 @@ class DataSource < Qt::Object
         flag    = File::FNM_DOTMATCH
 
         @paths = Dir.glob(pattern, flag)
-        ap @paths if DEBUG
+        # ap @paths if DEBUG
     end
 
     def test_encode()
