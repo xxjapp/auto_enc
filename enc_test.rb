@@ -112,7 +112,7 @@ end
 
 if __FILE__ == $0
     begin
-        src = IO.binread 'C:/Windows/System32/log.txt'
+        src = IO.binread 'C:\RailsInstaller\DevKit\lib\perl5\5.8\unicore\NamesList.txt'
     rescue => e
         Utils.report_error e
         exit
