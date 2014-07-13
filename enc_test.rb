@@ -32,20 +32,22 @@ module EncTest
         result[:cd] = cd
 
         encoding0 = cd.encoding.upcase
-        result[encoding0] = encode_and_check(src, encoding0)
+        encode_and_check(src, encoding0, result)
 
         ENCODING_CANDIDATES.each do |encoding|
             next if encoding == encoding0
-            result[encoding] = encode_and_check(src, encoding)
+            encode_and_check(src, encoding, result)
         end
 
         return result
     end
 
-    def self.encode_and_check(src, encoding)
+    def self.encode_and_check(src, encoding, result)
         src.force_encoding(encoding)
         dst = src.encode(TO_ENCODING)
-        check_encode(encoding, src, dst)
+        result[encoding] = check_encode(encoding, src, dst)
+    rescue => e
+        Utils.report_error e
     end
 
     def self.check_encode(encoding, src, dst)
