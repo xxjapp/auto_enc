@@ -217,7 +217,7 @@ class EncApp < Qt::MainWindow
         max_width = 1
 
         result.each do |k, v|
-            next if [:cd, :path].include? k
+            next if !v.is_a? Array
 
             encoding    = k
             dst_samples = v

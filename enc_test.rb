@@ -39,13 +39,22 @@ module EncTest
             encode_and_check(src, encoding, result)
         end
 
+        # remove encoding which count of dst_samples is not correct
+        result.reject! do |k, v|
+            v.is_a?(Array) && v.size != result[:samples_count]
+        end
+
         return result
     end
 
     def self.encode_and_check(src, encoding, result)
         src.force_encoding(encoding)
-        dst = src.encode(TO_ENCODING)
-        result[encoding] = check_encode(encoding, src, dst)
+
+        dst         = src.encode(TO_ENCODING)
+        dst_samples = check_encode(encoding, src, dst)
+
+        result[encoding]       = dst_samples
+        result[:samples_count] = dst_samples.size if dst_samples.size > result[:samples_count].to_i
     rescue => e
         Utils.report_error e
     end
@@ -103,7 +112,7 @@ if __FILE__ == $0
     puts result[:cd]
 
     result.each do |k, v|
-        next if k == :cd
+        next if !v.is_a? Array
 
         encoding    = k
         dst_samples = v
