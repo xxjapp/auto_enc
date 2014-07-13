@@ -83,6 +83,7 @@ module EncTest
                 next
             end
 
+            src.force_encoding(encoding)
             result[encoding] = check_encode(encoding, src, dst)
         end
 
@@ -94,7 +95,7 @@ end
 # test
 
 if __FILE__ == $0
-    src = IO.binread __FILE__
+    src = IO.binread 'C:\Users\XX9150\Desktop\downloads.txt'
 
     result = EncTest.test(src)
     ap result if DEBUG
