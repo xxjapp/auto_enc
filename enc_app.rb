@@ -138,18 +138,20 @@ class EncApp < Qt::MainWindow
 
         @progress_encode.range = 0..0
         @progress_select.range = 0..0
+
+        @progress_encode.value = 0
+        @progress_select.value = 0
     end
 
     def on_collect_paths_finished()
+        LOG.info __method__
+
         total = @data_source.total
 
         @label_total.text    = " Total: #{total} "
 
         @progress_encode.range = 0..total
         @progress_select.range = 0..total
-
-        @progress_encode.value = 0
-        @progress_select.value = 0
     end
 
     def on_test_one_finished()
