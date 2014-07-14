@@ -30,7 +30,11 @@ module EncTest
         end
 
         cd = CharDet.detect(src)
-        result[:cd] = cd
+
+        if is_ascii?(cd)
+            result[:cd] = cd
+            return result
+        end
 
         encoding0 = cd.encoding.upcase
         encode_and_check(src, encoding0, result)
@@ -46,6 +50,10 @@ module EncTest
         end
 
         return result
+    end
+
+    def self.is_ascii?(cd)
+        cd && cd.encoding == 'ascii' && cd.confidence = 1.0
     end
 
     def self.encode_and_check(src, encoding, result)

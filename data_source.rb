@@ -89,7 +89,7 @@ class DataSource < Qt::Object
         cd    = data[:cd]
         error = data[:error]
 
-        if bom || error || is_ascii?(cd) || include_user_keywords(data)
+        if bom || error || EncTest.is_ascii?(cd) || include_user_keywords(data)
             @skipped += 1
             emit pick_one_skipped()
             return pick_enc_data()
@@ -97,10 +97,6 @@ class DataSource < Qt::Object
             @selected += 1
             return data
         end
-    end
-
-    def is_ascii?(cd)
-        cd && cd.encoding == 'ascii' && cd.confidence = 1.0
     end
 
     def include_user_keywords(result)
