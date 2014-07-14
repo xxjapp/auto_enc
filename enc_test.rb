@@ -15,6 +15,7 @@ module EncTest
 
     ENCODING_CANDIDATES = ['UTF-8', 'GB2312', 'ISO-8859-2', 'ISO-8859-1', 'SHIFT_JIS', 'WINDOWS-1250', 'UTF-16LE', 'UTF-16BE']
     TO_ENCODING         = 'UTF-8'
+    UNREPORT_ERRORS     = [Encoding::InvalidByteSequenceError, Encoding::UndefinedConversionError, ArgumentError]
     MAX_SAMPLES         = 5
     DEBUG               = false
 
@@ -56,7 +57,9 @@ module EncTest
         result[encoding]       = dst_samples
         result[:samples_count] = dst_samples.size if dst_samples.size > result[:samples_count].to_i
     rescue => e
-        Utils.report_error e
+        if !UNREPORT_ERRORS.include?(e.class)
+            Utils.report_error(e)
+        end
     end
 
     def self.check_encode(encoding, src, dst)

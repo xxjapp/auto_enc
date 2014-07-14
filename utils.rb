@@ -18,7 +18,7 @@ module Utils
     end
 
     def self.report_error(e)
-        $stderr.puts "Error during processing: #{$!}"
+        $stderr.puts "Error during processing: #{$!} (#{e.class})"
         $stderr.puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
     end
 end
