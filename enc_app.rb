@@ -143,6 +143,7 @@ class EncApp < Qt::MainWindow
 
             if keywords
                 @keywords = keywords.force_encoding('UTF-8').split(/\s+/)
+                @keywords_label.text = "[#{@keywords.join(', ')}]".force_encoding('UTF-8')
                 @data_source.keywords = @keywords if @data_source
             end
         end
