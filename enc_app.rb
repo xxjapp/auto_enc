@@ -18,6 +18,7 @@ class EncApp < Qt::MainWindow
     TITLE            = 'Enc App'
     SELECT_FOLDER    = 'Select folder'
     SPECIFY_KEYWORDS = 'Specify keywords'
+    KEYWORD_FILE     = '.keywords'
 
     FONT = Qt::Font.new "Microsoft YaHei-X", 12
 
@@ -37,6 +38,7 @@ class EncApp < Qt::MainWindow
         # use File.dirname(File.expand_path(__FILE__))
         @path       = "D:/xxj_backup_20130519"
         @extensions = %w[original original~]
+        @keywords   = read_keywords()
 
         self.windowTitle = TITLE
         self.windowIcon  = @icon0
@@ -45,6 +47,26 @@ class EncApp < Qt::MainWindow
 
         resize 800, 400
         show
+    end
+
+    def read_keywords()
+        keywords = []
+
+        begin
+            IO.foreach(KEYWORD_FILE, encoding: 'UTF-8') do |line|
+                line.chomp!
+                keywords << line
+            end
+        rescue Errno::ENOENT
+        end
+
+        return keywords
+    end
+
+    def save_keywords(keywords)
+        File.open(KEYWORD_FILE, 'w+') do |f|
+            keywords.each { |keyword| f.puts(keyword) }
+        end
     end
 
     def init_ui
@@ -62,7 +84,7 @@ class EncApp < Qt::MainWindow
 
         @path_label       = Qt::Label.new
         @extensions_label = Qt::Label.new
-        @keywords_edit    = Qt::TextEdit.new
+        @keywords_edit    = Qt::TextEdit.new "[#{@keywords.join(' ')}]".force_encoding('UTF-8')
 
         @keywords_edit.readOnly = true
 
@@ -138,14 +160,16 @@ class EncApp < Qt::MainWindow
 
         input_dlg.windowTitle = "Keywords"
         input_dlg.labelText   = "Specify keywords"
-        input_dlg.textValue   = @keywords.join(' ') if @keywords
+        input_dlg.textValue   = @keywords.join(' ')
 
         if input_dlg.exec == 1
             keywords = input_dlg.textValue
 
             if keywords
-                @keywords             = keywords.force_encoding('UTF-8').split(/\s+/)
-                @keywords_edit.text   = "[#{@keywords.join(' ')}]".force_encoding('UTF-8')
+                @keywords = keywords.force_encoding('UTF-8').split(/\s+/)
+                @keywords_edit.text = "[#{@keywords.join(' ')}]".force_encoding('UTF-8')
+                save_keywords(@keywords)
+
                 @data_source.keywords = @keywords if @data_source
             end
         end
