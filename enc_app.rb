@@ -204,8 +204,6 @@ class EncApp < Qt::MainWindow
     end
 
     def on_collect_paths_finished()
-        LOG.info __method__
-
         total = @data_source.total
 
         @label_total.text    = " Total: #{total} "
@@ -215,14 +213,10 @@ class EncApp < Qt::MainWindow
     end
 
     def on_test_one_finished()
-        LOG.info __method__
-
         @progress_encode.value += 1
     end
 
     def on_pick_one_skipped()
-        LOG.info __method__
-
         skipped = @data_source.skipped
         @label_skipped.text = " Skipped: #{skipped} "
 
@@ -230,8 +224,6 @@ class EncApp < Qt::MainWindow
     end
 
     def on_clicked()
-        LOG.info __method__
-
         selected = @data_source.selected
         @label_selected.text = " Selected: #{selected} "
 
