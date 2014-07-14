@@ -62,11 +62,13 @@ class EncApp < Qt::MainWindow
 
         @path_label       = Qt::Label.new
         @extensions_label = Qt::Label.new
-        @keywords_label   = Qt::Label.new
+        @keywords_edit    = Qt::TextEdit.new
+
+        @keywords_edit.readOnly = true
 
         @grid1.addWidget @path_label, 0, 0
         @grid1.addWidget @extensions_label, 1, 0
-        @grid1.addWidget @keywords_label, 2, 0
+        @grid1.addWidget @keywords_edit, 2, 0
 
         @grid1.setRowStretch 4, 1
     end
@@ -125,7 +127,7 @@ class EncApp < Qt::MainWindow
             @extensions = folder_dlg.extensions.collect { |e| e.downcase }
 
             @path_label.text       = @path.force_encoding('UTF-8')
-            @extensions_label.text = "[#{@extensions.join(', ')}]".force_encoding('UTF-8')
+            @extensions_label.text = "[#{@extensions.join(' ')}]".force_encoding('UTF-8')
 
             start_process
         end
@@ -142,8 +144,8 @@ class EncApp < Qt::MainWindow
             keywords = input_dlg.textValue
 
             if keywords
-                @keywords = keywords.force_encoding('UTF-8').split(/\s+/)
-                @keywords_label.text = "[#{@keywords.join(', ')}]".force_encoding('UTF-8')
+                @keywords             = keywords.force_encoding('UTF-8').split(/\s+/)
+                @keywords_edit.text   = "[#{@keywords.join(' ')}]".force_encoding('UTF-8')
                 @data_source.keywords = @keywords if @data_source
             end
         end

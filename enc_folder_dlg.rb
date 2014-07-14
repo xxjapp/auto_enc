@@ -55,7 +55,7 @@ class EncFolderDlg < Qt::Dialog
         @path_edit.text = @path
         @path_edit.placeholderText = 'Select a folder'
 
-        @extensions_edit.text = @extensions.join(', ')
+        @extensions_edit.text = @extensions.join(' ')
         @extensions_edit.placeholderText= "Specify extensions seperated with ','"
 
         connect path_button,   SIGNAL('clicked()'), SLOT('on_clicked()')
@@ -68,7 +68,7 @@ class EncFolderDlg < Qt::Dialog
             select_folder
         elsif sender.text == TEXT_OK
             @path       = @path_edit.text
-            @extensions = @extensions_edit.text.strip.split(/\s*,\s*/)
+            @extensions = @extensions_edit.text.strip.split(/\s+/)
 
             accept()
         elsif sender.text == TEXT_CANCEL
