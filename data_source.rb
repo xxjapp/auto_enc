@@ -32,9 +32,13 @@ class DataSource < Qt::Object
 
     def start_test_encode()
         Thread.new do
-            collect_paths()
-            emit collect_paths_finished()
-            test_encode()
+            begin
+                collect_paths()
+                emit collect_paths_finished()
+                test_encode()
+            rescue => e
+                Utils.report_error e
+            end
         end
     end
 
