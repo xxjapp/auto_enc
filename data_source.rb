@@ -5,7 +5,6 @@
 #
 
 require 'awesome_print'
-require 'timeout'
 require './enc_test'
 require './simple_log'
 require './utils'
@@ -33,13 +32,9 @@ class DataSource < Qt::Object
 
     def start_test_encode()
         Thread.new do
-            begin
-                collect_paths()
-                emit collect_paths_finished()
-                test_encode()
-            rescue => e
-                Utils.report_error e
-            end
+            collect_paths()
+            emit collect_paths_finished()
+            test_encode()
         end
     end
 
@@ -68,15 +63,7 @@ class DataSource < Qt::Object
             result[:path] = path
 
             push result
-
-            begin
-                Timeout::timeout(5) {
-                    emit test_one_finished()
-                }
-            rescue Timeout::Error => e
-                Utils.report_error e
-                raise e
-            end
+            emit test_one_finished()
         end
 
         push :end
