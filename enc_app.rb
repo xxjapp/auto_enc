@@ -32,10 +32,10 @@ class EncApp < Qt::MainWindow
         @icon0 = Qt::Icon.new('red_24.png')
         @icon1 = Qt::Icon.new('green_24.png')
 
-        # @path       = "D:/xxj_backup_20130519"
-        # @extensions = %w[original original~]
-        @path       = File.dirname(File.expand_path(__FILE__))
-        @extensions = %w[rb]
+        @path       = "D:/xxj_backup_20130519"
+        @extensions = %w[original original~]
+        # @path       = File.dirname(File.expand_path(__FILE__))
+        # @extensions = %w[rb]
         @keywords   = read_keywords()
 
         self.windowTitle = TITLE
@@ -181,16 +181,27 @@ class EncApp < Qt::MainWindow
         @data_source.start_test_encode
         show_selection
         start_timer
+
+        @selected = 0
     end
 
     def start_timer
-        t = Qt::Timer.new(self)
-        t.start(16)
-        connect t, SIGNAL('timeout()'), SLOT('on_timeout()')
+        return if @timer
+
+        @timer = Qt::Timer.new(self)
+        @timer.start(16)
+
+        connect @timer, SIGNAL('timeout()'), SLOT('on_timeout()')
     end
 
     def on_timeout()
-        @progress_encode.value = @data_source.encoded
+        skipped = @data_source.skipped
+        encoded = @data_source.encoded
+
+        @label_skipped.text = " Skipped: #{skipped} "
+
+        @progress_encode.value = encoded
+        @progress_select.value = skipped + @selected
     end
 
     def init_statusbar_on_start()
@@ -217,18 +228,10 @@ class EncApp < Qt::MainWindow
         @progress_select.range = 0..total
     end
 
-    def on_pick_one_skipped()
-        skipped = @data_source.skipped
-        @label_skipped.text = " Skipped: #{skipped} "
-
-        @progress_select.value += 1
-    end
-
     def on_clicked()
-        selected = @data_source.selected
-        @label_selected.text = " Selected: #{selected} "
+        @selected += 1
 
-        @progress_select.value += 1
+        @label_selected.text = " Selected: #{@selected} "
 
         show_selection
     end
@@ -240,8 +243,6 @@ class EncApp < Qt::MainWindow
             case result
             when :collect_paths_finished
                 on_collect_paths_finished()
-            when :pick_one_skipped
-                on_pick_one_skipped()
             when :no_data
                 Qt::Application.processEvents
             when :end

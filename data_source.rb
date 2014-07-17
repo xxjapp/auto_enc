@@ -22,8 +22,7 @@ class DataSource
         @queue      = Queue.new
 
         @encoded    = Qt::AtomicInt.new
-        @skipped    = 0
-        @selected   = 0
+        @skipped    = Qt::AtomicInt.new
     end
 
     def start_test_encode()
@@ -89,11 +88,9 @@ class DataSource
         error = data[:error]
 
         if bom || error || EncTest.is_ascii?(cd) || include_user_keywords(data)
-            @skipped += 1
-            push :pick_one_skipped
+            @skipped.fetchAndAddRelaxed(1)
             return pick_enc_data()
         else
-            @selected += 1
             return data
         end
     end
@@ -127,10 +124,6 @@ class DataSource
     end
 
     def skipped
-        @skipped
-    end
-
-    def selected
-        @selected
+        @skipped.fetchAndAddRelaxed(0)
     end
 end
