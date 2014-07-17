@@ -25,10 +25,6 @@ class EncApp < Qt::MainWindow
     slots 'on_triggered()'
     slots 'on_clicked()'
 
-    slots 'on_collect_paths_finished()'
-    slots 'on_test_one_finished()'
-    slots 'on_pick_one_skipped()'
-
     def initialize
         super
 
@@ -178,10 +174,6 @@ class EncApp < Qt::MainWindow
     def start_process
         @data_source.cancel if @data_source
         @data_source = DataSource.new(@path, @extensions, @keywords)
-
-        connect @data_source, SIGNAL('collect_paths_finished()'),   SLOT('on_collect_paths_finished()')
-        connect @data_source, SIGNAL('test_one_finished()'),        SLOT('on_test_one_finished()')
-        connect @data_source, SIGNAL('pick_one_skipped()'),         SLOT('on_pick_one_skipped()')
 
         init_statusbar_on_start()
         @data_source.start_test_encode

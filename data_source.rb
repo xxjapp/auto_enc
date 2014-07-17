@@ -9,19 +9,13 @@ require './enc_test'
 require './simple_log'
 require './utils'
 
-class DataSource < Qt::Object
+class DataSource
     LOG   = SimpleLog.new $stdout
     DEBUG = true
 
     attr_accessor :keywords
 
-    signals 'collect_paths_finished()'
-    signals 'test_one_finished()'
-    signals 'pick_one_skipped()'
-
     def initialize(path, extensions, keywords)
-        super(nil)
-
         @path       = path
         @extensions = extensions
         @keywords   = keywords
@@ -34,7 +28,7 @@ class DataSource < Qt::Object
         Thread.new do
             begin
                 collect_paths()
-                emit collect_paths_finished()
+                push :collect_paths_finished
                 test_encode()
             rescue => e
                 Utils.report_error e
@@ -65,9 +59,7 @@ class DataSource < Qt::Object
             end
 
             result[:path] = path
-
             push result
-            emit test_one_finished()
         end
 
         push :end
@@ -95,7 +87,7 @@ class DataSource < Qt::Object
 
         if bom || error || EncTest.is_ascii?(cd) || include_user_keywords(data)
             @skipped += 1
-            emit pick_one_skipped()
+            push :pick_one_skipped
             return pick_enc_data()
         else
             @selected += 1
