@@ -24,6 +24,7 @@ class EncApp < Qt::MainWindow
 
     slots 'on_triggered()'
     slots 'on_clicked()'
+    slots 'on_timeout()'
 
     def initialize
         super
@@ -31,9 +32,10 @@ class EncApp < Qt::MainWindow
         @icon0 = Qt::Icon.new('red_24.png')
         @icon1 = Qt::Icon.new('green_24.png')
 
-        # use File.dirname(File.expand_path(__FILE__))
-        @path       = "D:/xxj_backup_20130519"
-        @extensions = %w[original original~]
+        # @path       = "D:/xxj_backup_20130519"
+        # @extensions = %w[original original~]
+        @path       = File.dirname(File.expand_path(__FILE__))
+        @extensions = %w[rb]
         @keywords   = read_keywords()
 
         self.windowTitle = TITLE
@@ -178,6 +180,17 @@ class EncApp < Qt::MainWindow
         init_statusbar_on_start()
         @data_source.start_test_encode
         show_selection
+        start_timer
+    end
+
+    def start_timer
+        t = Qt::Timer.new(self)
+        t.start(16)
+        connect t, SIGNAL('timeout()'), SLOT('on_timeout()')
+    end
+
+    def on_timeout()
+        @progress_encode.value = @data_source.encoded
     end
 
     def init_statusbar_on_start()
@@ -204,10 +217,6 @@ class EncApp < Qt::MainWindow
         @progress_select.range = 0..total
     end
 
-    def on_test_one_finished()
-        @progress_encode.value += 1
-    end
-
     def on_pick_one_skipped()
         skipped = @data_source.skipped
         @label_skipped.text = " Skipped: #{skipped} "
@@ -224,13 +233,30 @@ class EncApp < Qt::MainWindow
         show_selection
     end
 
-    def show_selection
-        @widget2.enabled = false if @widget2
+    def process_events()
+        while true
+            result = @data_source.pick_enc_data
 
-        while (result = @data_source.pick_enc_data) == :no_data
-            Qt::Application.processEvents
+            case result
+            when :collect_paths_finished
+                on_collect_paths_finished()
+            when :pick_one_skipped
+                on_pick_one_skipped()
+            when :no_data
+                Qt::Application.processEvents
+            when :end
+                break
+            else
+                break
+            end
         end
 
+        result
+    end
+
+    def show_selection
+        @widget2.enabled = false if @widget2
+        result = process_events()
         @widget2.close if @widget2
 
         if result == :end

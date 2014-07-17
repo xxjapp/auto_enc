@@ -20,6 +20,8 @@ class DataSource
         @extensions = extensions
         @keywords   = keywords
         @queue      = Queue.new
+
+        @encoded    = Qt::AtomicInt.new
         @skipped    = 0
         @selected   = 0
     end
@@ -60,6 +62,7 @@ class DataSource
 
             result[:path] = path
             push result
+            @encoded.fetchAndAddRelaxed(1)
         end
 
         push :end
@@ -117,6 +120,10 @@ class DataSource
 
     def total
         @paths.size
+    end
+
+    def encoded
+        @encoded.fetchAndAddRelaxed(0)
     end
 
     def skipped
