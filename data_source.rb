@@ -49,14 +49,14 @@ class DataSource
         @paths.each do |path|
             return if @wasCanceled
 
-            LOG.info path
+            # LOG.info path
 
             begin
                 src    = IO.binread path
-                result = EncTest.encode_all(src)
+                result = EncTest.encode_all(src, path)
             rescue => e
                 result = {error: e}
-                Utils.report_error e
+                Utils.report_error(e, path)
             end
 
             result[:path] = path

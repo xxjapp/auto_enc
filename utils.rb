@@ -17,8 +17,9 @@ module Utils
         p t.bytes.to_a
     end
 
-    def self.report_error(e)
+    def self.report_error(e, info = nil)
         $stderr.puts "Error during processing: #{$!} (#{e.class})"
+        $stderr.puts "info = #{info}" if info
         $stderr.puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
     end
 end

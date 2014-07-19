@@ -20,7 +20,7 @@ module EncTest
     MAX_SAMPLES         = 5
     DEBUG               = false
 
-    def self.encode_all(src)
+    def self.encode_all(src, info = nil)
         result = {}
 
         bom = BomUtils.detect(src)
@@ -33,7 +33,7 @@ module EncTest
         encoding0 = nil
 
         begin
-            Timeout::timeout(5) {
+            Timeout::timeout(10) {
                 cd = CharDet.detect(src)
 
                 if is_ascii?(cd)
@@ -41,16 +41,18 @@ module EncTest
                     return result
                 end
 
-                encoding0 = cd.encoding.upcase
-                encode_and_check(src, encoding0, result)
+                if cd.encoding
+                    encoding0 = cd.encoding.upcase
+                    encode_and_check(src, encoding0, result, info)
+                end
             }
-        rescue Timeout::Error =>e
-            Utils.report_error e
+        rescue Timeout::Error => e
+            Utils.report_error(e, info)
         end
 
         ENCODING_CANDIDATES.each do |encoding|
             next if encoding == encoding0
-            encode_and_check(src, encoding, result)
+            encode_and_check(src, encoding, result, info)
         end
 
         # remove encoding which count of dst_samples is not correct
@@ -65,7 +67,7 @@ module EncTest
         cd && cd.encoding == 'ascii' && cd.confidence = 1.0
     end
 
-    def self.encode_and_check(src, encoding, result)
+    def self.encode_and_check(src, encoding, result, info = nil)
         src.force_encoding(encoding)
 
         dst         = src.encode(TO_ENCODING)
@@ -75,7 +77,7 @@ module EncTest
         result[:samples_count] = dst_samples.size if dst_samples.size > result[:samples_count].to_i
     rescue => e
         if !UNREPORT_ERRORS.include?(e.class)
-            Utils.report_error(e)
+            Utils.report_error(e, info)
         end
     end
 
@@ -112,11 +114,13 @@ end
 # test
 
 if __FILE__ == $0
+    path = 'D:\Python33\Lib\test\cjkencodings\big5-utf8.txt'
+
     begin
-        src    = IO.binread 'D:\Python33\Lib\test\cjkencodings\big5-utf8.txt'
-        result = EncTest.encode_all(src)
+        src    = IO.binread path
+        result = EncTest.encode_all(src, path)
     rescue => e
-        Utils.report_error e
+        Utils.report_error(e, path)
         exit
     end
 
