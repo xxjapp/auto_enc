@@ -6,6 +6,7 @@
 
 require 'awesome_print'
 require 'rchardet19'
+require 'timeout'
 require './bom_utils'
 require './simple_log'
 require './utils'
@@ -29,15 +30,23 @@ module EncTest
             return result
         end
 
-        cd = CharDet.detect(src)
+        encoding0 = nil
 
-        if is_ascii?(cd)
-            result[:cd] = cd
-            return result
+        begin
+            Timeout::timeout(5) {
+                cd = CharDet.detect(src)
+
+                if is_ascii?(cd)
+                    result[:cd] = cd
+                    return result
+                end
+
+                encoding0 = cd.encoding.upcase
+                encode_and_check(src, encoding0, result)
+            }
+        rescue Timeout::Error =>e
+            Utils.report_error e
         end
-
-        encoding0 = cd.encoding.upcase
-        encode_and_check(src, encoding0, result)
 
         ENCODING_CANDIDATES.each do |encoding|
             next if encoding == encoding0
