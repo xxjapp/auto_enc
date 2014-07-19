@@ -35,9 +35,9 @@ module EncTest
         begin
             Timeout::timeout(10) {
                 cd = CharDet.detect(src)
+                result[:cd] = cd
 
                 if is_ascii?(cd)
-                    result[:cd] = cd
                     return result
                 end
 

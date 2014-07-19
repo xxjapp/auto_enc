@@ -33,7 +33,7 @@ class EncApp < Qt::MainWindow
         @icon1 = Qt::Icon.new('green_24.png')
 
         @path       = "D:/xxj_backup_20130519"
-        @extensions = %w[original original~]
+        @extensions = %w[java]
         # @path       = File.dirname(File.expand_path(__FILE__))
         # @extensions = %w[rb]
         @keywords   = read_keywords()
