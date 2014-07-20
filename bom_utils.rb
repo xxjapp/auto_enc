@@ -6,11 +6,11 @@
 
 module BomUtils
     BOM_LIST = {
-        UTF_8:    "\xEF\xBB\xBF".force_encoding('ASCII-8BIT'),
-        UTF_16BE: "\xFE\xFF".force_encoding('ASCII-8BIT'),
-        UTF_16LE: "\xFF\xFE".force_encoding('ASCII-8BIT'),
-        UTF_32BE: "\x00\x00\xFE\xFF".force_encoding('ASCII-8BIT'),
-        UTF_32LE: "\xFE\xFF\x00\x00".force_encoding('ASCII-8BIT'),
+        'UTF-8'    => "\xEF\xBB\xBF".force_encoding('ASCII-8BIT'),
+        'UTF-16BE' => "\xFE\xFF".force_encoding('ASCII-8BIT'),
+        'UTF-16LE' => "\xFF\xFE".force_encoding('ASCII-8BIT'),
+        'UTF-32BE' => "\x00\x00\xFE\xFF".force_encoding('ASCII-8BIT'),
+        'UTF-32LE' => "\xFE\xFF\x00\x00".force_encoding('ASCII-8BIT'),
     }
 
     def self.detect(src)
