@@ -12,7 +12,7 @@ class SimpleLog < Logger
 
         self.formatter = proc do |severity, datetime, progname, msg|
             file, line, method = caller[4].match(%r{([^/]+):(\d+):in `(.+)'}).captures
-            "#{datetime.to_s[0..-7]} #{severity[0]} (#{file}:#{line}) #{method} - #{msg}\n"
+            "#{datetime.to_s[0..-7]} #{severity[0]} [Th-#{Thread.current.object_id}] (#{file}:#{line}) #{method} - #{msg}\n"
         end
     end
 end
