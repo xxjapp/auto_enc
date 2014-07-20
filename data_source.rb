@@ -157,7 +157,8 @@ class DataSource
     end
 
     def convert_encoding()
-        backup_parent = "#{Dir.tmpdir}/_enc_app"
+        timestamp     = Time.now.to_s.gsub(/[^0-9]/, '')[0..-5]
+        backup_parent = "#{Dir.tmpdir}/_enc_app/#{timestamp}"
         FileUtils.mkdir_p backup_parent
 
         while !@queue2.empty?
