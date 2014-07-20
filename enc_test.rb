@@ -114,7 +114,7 @@ end
 # test
 
 if __FILE__ == $0
-    path = 'D:\Python33\Lib\test\cjkencodings\big5-utf8.txt'
+    path = __FILE__
 
     begin
         src    = IO.binread path
