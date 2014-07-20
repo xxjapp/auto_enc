@@ -23,8 +23,8 @@ class DataSource
         @queue      = Queue.new     # for testing encoding
         @queue2     = Queue.new     # for saving encoding
 
-        @encoded    = Qt::AtomicInt.new
-        @skipped    = Qt::AtomicInt.new
+        @encoded       = Qt::AtomicInt.new
+        @auto_inferred = Qt::AtomicInt.new
     end
 
     def start_test_encode()
@@ -86,7 +86,7 @@ class DataSource
         return data if data.is_a? Symbol
 
         if auto_infer_encoding(data)
-            @skipped.fetchAndAddRelaxed(1)
+            @auto_inferred.fetchAndAddRelaxed(1)
             return pick_enc_data()
         else
             return data
@@ -134,8 +134,8 @@ class DataSource
         @encoded.fetchAndAddRelaxed(0)
     end
 
-    def skipped
-        @skipped.fetchAndAddRelaxed(0)
+    def auto_inferred
+        @auto_inferred.fetchAndAddRelaxed(0)
     end
 
     def save_encoding(path, encoding)

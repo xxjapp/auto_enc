@@ -104,25 +104,25 @@ class EncApp < Qt::MainWindow
     def init_statusbar
         statusBar.styleSheet = 'background-color:#f9e7ef;'
 
-        @progress_encode = Qt::ProgressBar.new
-        @progress_select = Qt::ProgressBar.new
-        @label_total     = Qt::Label.new
-        @label_skipped   = Qt::Label.new
-        @label_selected  = Qt::Label.new
+        @progress_encode     = Qt::ProgressBar.new
+        @progress_select     = Qt::ProgressBar.new
+        @label_total         = Qt::Label.new
+        @label_auto_inferred = Qt::Label.new
+        @label_selected      = Qt::Label.new
 
         @progress_encode.hide
         @progress_select.hide
 
-        @progress_encode.toolTip = "background encoding progress"
-        @progress_select.toolTip = "user selection plus auto-skipped progress"
-        @label_total.toolTip     = "total file count"
-        @label_skipped.toolTip   = "auto-skipped file count including files with bom or pure ascii file"
-        @label_selected.toolTip  = "user selected file count"
+        @progress_encode.toolTip     = "background encoding progress"
+        @progress_select.toolTip     = "user selection plus auto-infer progress"
+        @label_total.toolTip         = "total file count"
+        @label_auto_inferred.toolTip = "auto-inferred file count including files with bom or pure ascii or including user key words"
+        @label_selected.toolTip      = "user selected file count"
 
         statusBar.addPermanentWidget @progress_encode, 1
         statusBar.addPermanentWidget @progress_select, 1
         statusBar.addPermanentWidget @label_total
-        statusBar.addPermanentWidget @label_skipped
+        statusBar.addPermanentWidget @label_auto_inferred
         statusBar.addPermanentWidget @label_selected
     end
 
@@ -193,19 +193,19 @@ class EncApp < Qt::MainWindow
     end
 
     def on_timeout()
-        skipped = @data_source.skipped
-        encoded = @data_source.encoded
+        auto_inferred = @data_source.auto_inferred
+        encoded       = @data_source.encoded
 
-        @label_skipped.text = " Skipped: #{skipped} "
+        @label_auto_inferred.text = " Auto: #{auto_inferred} "
 
         @progress_encode.value = encoded
-        @progress_select.value = skipped + @selected
+        @progress_select.value = auto_inferred + @selected
     end
 
     def init_statusbar_on_start()
-        @label_total.text    = " Total: 0 "
-        @label_skipped.text  = " Skipped: 0 "
-        @label_selected.text = " Selected: 0 "
+        @label_total.text         = " Total: 0 "
+        @label_auto_inferred.text = " Auto: 0 "
+        @label_selected.text      = " Selected: 0 "
 
         @progress_encode.show
         @progress_select.show
