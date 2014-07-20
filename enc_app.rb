@@ -356,7 +356,7 @@ class EncApp < Qt::MainWindow
 
         if msgbox.exec == Qt::MessageBox::Ok
             @progress_encode.value = 0
-            @data_source.start_convert_encoding
+            @data_source.start_convert_encoding(@skipped)
         end
     end
 end

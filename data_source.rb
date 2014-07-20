@@ -142,8 +142,8 @@ class DataSource
         @queue2.push "#{path}\n#{encoding}"
     end
 
-    def start_convert_encoding
-        @encoded.fetchAndStoreRelaxed(0)
+    def start_convert_encoding(skipped)
+        @encoded.fetchAndStoreRelaxed(skipped)
 
         Thread.new do
             begin
