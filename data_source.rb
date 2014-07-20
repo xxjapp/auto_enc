@@ -34,7 +34,7 @@ class DataSource
                 push :collect_paths_finished
                 test_encode()
             rescue => e
-                Utils.report_error e
+                Utils.report_error(e)
             end
         end
     end
@@ -57,8 +57,8 @@ class DataSource
                 src    = IO.binread path
                 result = EncTest.encode_all(src, path)
             rescue => e
-                result = {error: e}
                 Utils.report_error(e, path)
+                next
             end
 
             result[:path] = path
@@ -94,8 +94,6 @@ class DataSource
     end
 
     def auto_infer_encoding(result)
-        return true if result[:error]
-
         path = result[:path]
 
         if (bom = result[:bom])
@@ -151,7 +149,7 @@ class DataSource
             begin
                 convert_encoding()
             rescue => e
-                Utils.report_error e
+                Utils.report_error(e)
             end
         end
     end
