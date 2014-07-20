@@ -108,8 +108,8 @@ class EncApp < Qt::MainWindow
         @progress_select     = Qt::ProgressBar.new
         @label_total         = Qt::Label.new
         @label_auto_inferred = Qt::Label.new
-        @label_skipped       = Qt::Label.new
         @label_selected      = Qt::Label.new
+        @label_skipped       = Qt::Label.new
 
         @progress_encode.hide
         @progress_select.hide
@@ -118,15 +118,15 @@ class EncApp < Qt::MainWindow
         @progress_select.toolTip     = "user selection plus auto-infer progress"
         @label_total.toolTip         = "total file count"
         @label_auto_inferred.toolTip = "auto-inferred file count including files with bom or pure ascii or including user key words"
-        @label_skipped.toolTip       = "user skipped file count"
         @label_selected.toolTip      = "user selected file count"
+        @label_skipped.toolTip       = "user skipped file count"
 
         statusBar.addPermanentWidget @progress_encode, 1
         statusBar.addPermanentWidget @progress_select, 1
         statusBar.addPermanentWidget @label_total
         statusBar.addPermanentWidget @label_auto_inferred
-        statusBar.addPermanentWidget @label_skipped
         statusBar.addPermanentWidget @label_selected
+        statusBar.addPermanentWidget @label_skipped
     end
 
     def on_triggered()
@@ -209,8 +209,8 @@ class EncApp < Qt::MainWindow
     def init_statusbar_on_start()
         @label_total.text         = " Total: 0 "
         @label_auto_inferred.text = " Auto: 0 "
-        @label_skipped.text       = " Skipped: 0 "
         @label_selected.text      = " Selected: 0 "
+        @label_skipped.text       = " Skipped: 0 "
 
         @progress_encode.show
         @progress_select.show
