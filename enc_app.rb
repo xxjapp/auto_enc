@@ -227,10 +227,9 @@ class EncApp < Qt::MainWindow
     end
 
     def on_clicked()
-        @selected += 1
-
         @data_source.save_encoding(sender.path, sender.encoding)
 
+        @selected += 1
         @label_selected.text = " Selected: #{@selected} "
 
         show_selection
