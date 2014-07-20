@@ -270,10 +270,12 @@ class EncApp < Qt::MainWindow
 
         @grid2 = Qt::GridLayout.new @widget2
 
-        label_path = Qt::Label.new result[:path]
-        label_cd   = Qt::Label.new result[:cd].to_s
+        edit_path = Qt::LineEdit.new result[:path]
+        label_cd  = Qt::Label.new result[:cd].to_s
 
-        @grid2.addWidget label_path, 0, 0
+        edit_path.readOnly = true
+
+        @grid2.addWidget edit_path, 0, 0
         @grid2.addWidget label_cd, 1, 0
 
         @widget3 = Qt::Widget.new
