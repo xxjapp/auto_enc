@@ -168,7 +168,7 @@ class DataSource
                 src.force_encoding(encoding)
 
                 backup_path = "#{backup_parent}/#{path.gsub(/[:\/\\]/, '_')}"
-                FileUtils.cp(path, backup_path)
+                FileUtils.mv(path, backup_path)
 
                 dst = src.encode(EncTest::TO_ENCODING)
                 IO.binwrite path, dst
