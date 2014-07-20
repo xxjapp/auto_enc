@@ -227,6 +227,7 @@ class EncApp < Qt::MainWindow
     end
 
     def on_clicked()
+        # TODO: skipped or auto-inferred
         @data_source.save_encoding(sender.path, sender.encoding)
 
         @selected += 1
@@ -286,8 +287,9 @@ class EncApp < Qt::MainWindow
 
         @grid3 = Qt::GridLayout.new @widget3
 
-        buttons = []
-        max_width = 1
+        buttons    = []
+        max_width  = 1
+        max_height = 1
 
         result.each do |k, v|
             next if !v.is_a? Array
@@ -295,24 +297,35 @@ class EncApp < Qt::MainWindow
             encoding    = k
             dst_samples = v
 
-            button = CheckButton.new(result[:path], encoding, dst_samples)
-            button.adjustSize
-            max_width = [max_width, button.width].max
+            button, max_width, max_height = add_button(result[:path], encoding, dst_samples, max_width, max_height)
             buttons << button
-
-            connect button, SIGNAL('clicked()'), SLOT('on_clicked()')
         end
+
+        button, max_width, max_height = add_button(result[:path], nil, nil, max_width, max_height)
+        buttons << button
 
         total_width  = self.width
         column_count = calc_column_count(total_width, max_width)
 
         # LOG.info "total_width = #{total_width}"
-        # LOG.info "max_width = #{max_width}"
+        # LOG.info "max_width   = #{max_width}"
+        # LOG.info "max_height  = #{max_height}"
 
         0.upto(buttons.size - 1) do |i|
-            buttons[i].minimumWidth = max_width
+            buttons[i].minimumWidth  = max_width
+            buttons[i].minimumHeight = max_height
             @grid3.addWidget buttons[i], i / column_count + 1, i % column_count
         end
+    end
+
+    def add_button(path, encoding, dst_samples, max_width, max_height)
+        button = CheckButton.new(path, encoding, dst_samples)
+        button.adjustSize
+        max_width  = [max_width, button.width].max
+        max_height = [max_height, button.height].max
+        connect button, SIGNAL('clicked()'), SLOT('on_clicked()')
+
+        return [button, max_width, max_height]
     end
 
     WIDGET_MARGIN   = 9
