@@ -260,7 +260,8 @@ class EncApp < Qt::MainWindow
         @widget2.close if @widget2
 
         if result == :end
-            LOG.info "end reached"
+            LOG.info "test end reached"
+            report_test_end()
             return
         end
 
@@ -319,6 +320,21 @@ class EncApp < Qt::MainWindow
     def calc_column_count(total_width, max_width)
         # 4 * WIDGET_MARGIN + 2 * BUTTON_MARGIN + N * max_width + (N - 1) * BUTTON_INTERVAL = total_width
         [1, (total_width - 4 * WIDGET_MARGIN - 2 * BUTTON_MARGIN + BUTTON_INTERVAL) / (max_width + BUTTON_INTERVAL)].max
+    end
+
+    def report_test_end()
+        msgbox = Qt::MessageBox.new
+
+        msgbox.icon            = Qt::MessageBox::Information
+        msgbox.text            = "Encoding test completed."
+        msgbox.informativeText = "Do you want to convert these files to UTF-8?"
+
+        msgbox.standardButtons = Qt::MessageBox::Ok | Qt::MessageBox::Cancel
+
+        if msgbox.exec == Qt::MessageBox::Ok
+            @progress_encode.value = 0
+            @data_source.start_convert_encoding
+        end
     end
 end
 

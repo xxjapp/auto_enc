@@ -142,4 +142,25 @@ class DataSource
     def save_encoding(path, encoding)
         @queue2.push "#{path}\n#{encoding}"
     end
+
+    def start_convert_encoding
+        @encoded.fetchAndStoreRelaxed(0)
+
+        Thread.new do
+            begin
+                convert_encoding()
+            rescue => e
+                Utils.report_error e
+            end
+        end
+    end
+
+    def convert_encoding()
+        while !@queue2.empty?
+            path, encoding = @queue2.pop.split("\n")
+
+            puts path
+            puts encoding
+        end
+    end
 end
