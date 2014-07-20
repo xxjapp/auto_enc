@@ -5,6 +5,7 @@
 #
 
 require 'awesome_print'
+require 'tmpdir'
 require './enc_test'
 require './simple_log'
 require './utils'
@@ -156,11 +157,24 @@ class DataSource
     end
 
     def convert_encoding()
+        backup_parent = "#{Dir.tmpdir}/_enc_app"
+        FileUtils.mkdir_p backup_parent
+
         while !@queue2.empty?
             path, encoding = @queue2.pop.split("\n")
 
-            puts path
-            puts encoding
+            if ![EncTest::TO_ENCODING, 'ascii'].include?(encoding)
+                src = IO.binread path
+                src.force_encoding(encoding)
+
+                backup_path = "#{backup_parent}/#{path.gsub(/[:\/\\]/, '_')}"
+                FileUtils.cp(path, backup_path)
+
+                dst = src.encode(EncTest::TO_ENCODING)
+                IO.binwrite path, dst
+            end
+
+            @encoded.fetchAndAddRelaxed(1)
         end
     end
 end

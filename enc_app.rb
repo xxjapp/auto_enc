@@ -327,7 +327,7 @@ class EncApp < Qt::MainWindow
 
         msgbox.icon            = Qt::MessageBox::Information
         msgbox.text            = "Encoding test completed."
-        msgbox.informativeText = "Do you want to convert these files to UTF-8?"
+        msgbox.informativeText = "Do you want to convert these files to '#{EncTest::TO_ENCODING}'?"
 
         msgbox.standardButtons = Qt::MessageBox::Ok | Qt::MessageBox::Cancel
 
