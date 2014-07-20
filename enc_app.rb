@@ -32,10 +32,8 @@ class EncApp < Qt::MainWindow
         @icon0 = Qt::Icon.new('red_24.png')
         @icon1 = Qt::Icon.new('green_24.png')
 
-        @path       = "D:/xxj_backup_20130519"
-        @extensions = %w[java]
-        # @path       = File.dirname(File.expand_path(__FILE__))
-        # @extensions = %w[rb]
+        @path       = File.dirname(File.expand_path(__FILE__))
+        @extensions = %w[txt]
         @keywords   = read_keywords()
 
         self.windowTitle = TITLE
@@ -231,6 +229,8 @@ class EncApp < Qt::MainWindow
     def on_clicked()
         @selected += 1
 
+        @data_source.save_encoding(sender.path, sender.encoding)
+
         @label_selected.text = " Selected: #{@selected} "
 
         show_selection
@@ -293,7 +293,7 @@ class EncApp < Qt::MainWindow
             encoding    = k
             dst_samples = v
 
-            button = CheckButton.new(encoding, dst_samples)
+            button = CheckButton.new(result[:path], encoding, dst_samples)
             button.adjustSize
             max_width = [max_width, button.width].max
             buttons << button

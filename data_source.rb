@@ -19,7 +19,8 @@ class DataSource
         @path       = path
         @extensions = extensions
         @keywords   = keywords
-        @queue      = Queue.new
+        @queue      = Queue.new     # for testing encoding
+        @queue2     = Queue.new     # for saving encoding
 
         @encoded    = Qt::AtomicInt.new
         @skipped    = Qt::AtomicInt.new
@@ -83,11 +84,7 @@ class DataSource
         data = @queue.pop
         return data if data.is_a? Symbol
 
-        bom   = data[:bom]
-        cd    = data[:cd]
-        error = data[:error]
-
-        if bom || error || EncTest.is_ascii?(cd) || include_user_keywords(data)
+        if auto_infer_encoding(data)
             @skipped.fetchAndAddRelaxed(1)
             return pick_enc_data()
         else
@@ -95,24 +92,39 @@ class DataSource
         end
     end
 
-    def include_user_keywords(result)
-        return false if !@keywords
+    def auto_infer_encoding(result)
+        return true if result[:error]
+
+        path = result[:path]
+
+        if (bom = result[:bom])
+            return save_encoding(path, bom)
+        elsif EncTest.is_ascii?(cd = result[:cd])
+            return save_encoding(path, cd.encoding)
+        elsif (encoding = test_user_keywords(result))
+            return save_encoding(path, encoding)
+        end
+
+        return false
+    end
+
+    def test_user_keywords(result)
+        return nil if !@keywords
 
         result.each do |k, v|
             next if !v.is_a? Array
 
-            # TODO: save encoding
             encoding    = k
             dst_samples = v
 
             dst_samples.each { |sample|
                 @keywords.each { |keyword|
-                    return true if sample.include? keyword
+                    return k if sample.include?(keyword)
                 }
             }
         end
 
-        return false
+        return nil
     end
 
     def total
@@ -125,5 +137,9 @@ class DataSource
 
     def skipped
         @skipped.fetchAndAddRelaxed(0)
+    end
+
+    def save_encoding(path, encoding)
+        @queue2.push "#{path}\n#{encoding}"
     end
 end
