@@ -46,7 +46,7 @@ module EncTest
                     encode_and_check(src, encoding0, result, info)
                 end
             }
-        rescue Timeout::Error => e
+        rescue => e
             Utils.report_error(e, info)
         end
 
