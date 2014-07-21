@@ -14,7 +14,8 @@ require './utils'
 module EncTest
     LOG = SimpleLog.new $stdout
 
-    ENCODING_CANDIDATES = ['UTF-8', 'GB18030', 'BIG5', 'WINDOWS-1250', 'ISO-8859-2', 'ISO-8859-1', 'SHIFT_JIS', 'UTF-16LE', 'UTF-16BE']
+    # SEE: http://dcx.sybase.com/1200/zh/dbadmin/natlang-s-3054843.html
+    ENCODING_CANDIDATES = ['UTF-8', 'GB18030', 'BIG5', 'WINDOWS-1252', 'WINDOWS-1250', 'ISO-8859-2', 'ISO-8859-1', 'SHIFT_JIS', 'UTF-16LE', 'UTF-16BE']
     TO_ENCODING         = 'UTF-8'
     UNREPORT_ERRORS     = [Encoding::InvalidByteSequenceError, Encoding::UndefinedConversionError, ArgumentError]
     MAX_SAMPLES         = 5
