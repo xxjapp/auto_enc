@@ -4,6 +4,7 @@
 # - class EncApp
 #
 
+require 'thread'
 require 'Qt'
 
 require './check_button'
